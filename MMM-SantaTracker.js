@@ -19,10 +19,6 @@ Module.register("MMM-SantaTracker", {
         this.loaded = false;
         this.dataLoaded = false;
 
-        // Override time tracking - advances by 1 minute each update when set
-        this.overrideTimeStart = null;
-        this.overrideTimeOffset = 0; // Minutes elapsed since override started
-
         // Update timer
         this.updateTimer = setInterval(() => {
             this.updateSanta();
@@ -114,7 +110,6 @@ Module.register("MMM-SantaTracker", {
     /**
      * Updates the map with the latest position of Santa
      * Requests current location from node_helper
-     * If overrideTime is set, advances by 1 minute on each update
      */
     updateSanta: function () {
         if (!this.dataLoaded) {
@@ -125,34 +120,10 @@ Module.register("MMM-SantaTracker", {
         this.debugLog("Requesting Santa's location from node_helper...");
 
         var now = new Date();
-        var timeToSend = null; // The time we'll send to node_helper
-
-        if (this.config.overTime != null) {
-            // Initialize override time tracking on first use (using original config value)
-            if (this.overrideTimeStart === null) {
-                this.debugLog("Starting override time progression from: '" + this.config.overTime + "'");
-                this.overrideTimeStart = new Date(this.config.overTime);
-                this.overrideTimeOffset = 0;
-            }
-
-            // Add elapsed minutes (1 minute per update interval)
-            this.overrideTimeOffset++;
-            var calculatedTime = new Date(this.overrideTimeStart.getTime() + (this.overrideTimeOffset * 60000));
-
-            this.debugLog("Override time progressed to: " + calculatedTime.toISOString() + " (+" + this.overrideTimeOffset + " minutes)");
-            timeToSend = calculatedTime.toISOString();
-        } else {
-            // Reset override tracking if overTime is removed
-            this.overrideTimeStart = null;
-            this.overrideTimeOffset = 0;
-            timeToSend = null;
-        }
 
         // Request Santa's location from node_helper (backend does the heavy lifting)
-        // Note: config.overTime is never modified, only used as the starting point
         this.sendSocketNotification("GET_SANTA_LOCATION", {
-            currentTime: now.valueOf(),
-            overrideTime: timeToSend
+            currentTime: now.valueOf()
         });
     },
 

@@ -18,6 +18,10 @@ module.exports = NodeHelper.create({
             debug: false,
             moduleName: this.name
         };
+
+        // Override time tracking - advances by 1 minute each update when set
+        this.overrideTimeStart = null;
+        this.overrideTimeOffset = 0; // Minutes elapsed since override started
     },
 
     debugLog: function (message) {
@@ -118,13 +122,30 @@ module.exports = NodeHelper.create({
 
     /**
      * Get Santa's current location
+     * If overTime is set in config, advances by 1 minute on each call
      */
-    getSantaLocation: function (currentTime, overrideTime) {
-        let timeToUse = overrideTime || currentTime;
+    getSantaLocation: function (currentTime) {
+        let timeToUse = currentTime;
 
-        // Parse override time if it's a string
-        if (typeof timeToUse === 'string') {
-            timeToUse = new Date(timeToUse).valueOf();
+        // Handle override time if configured
+        if (this.config.overTime != null) {
+            // Initialize override time tracking on first use
+            if (this.overrideTimeStart === null) {
+                this.debugLog("Starting override time progression from: '" + this.config.overTime + "'");
+                this.overrideTimeStart = new Date(this.config.overTime);
+                this.overrideTimeOffset = 0;
+            }
+
+            // Add elapsed minutes (1 minute per update)
+            this.overrideTimeOffset++;
+            var calculatedTime = new Date(this.overrideTimeStart.getTime() + (this.overrideTimeOffset * 60000));
+
+            this.debugLog("Override time progressed to: " + calculatedTime.toISOString() + " (+" + this.overrideTimeOffset + " minutes)");
+            timeToUse = calculatedTime.valueOf();
+        } else {
+            // Reset override tracking if overTime is removed
+            this.overrideTimeStart = null;
+            this.overrideTimeOffset = 0;
         }
 
         this.debugLog("Getting Santa's location for time: " + new Date(timeToUse).toISOString());
@@ -237,7 +258,7 @@ module.exports = NodeHelper.create({
                 break;
 
             case "GET_SANTA_LOCATION":
-                const santaLocation = this.getSantaLocation(payload.currentTime, payload.overrideTime);
+                const santaLocation = this.getSantaLocation(payload.currentTime);
                 this.sendSocketNotification("SANTA_LOCATION_UPDATE", santaLocation);
                 break;
 
