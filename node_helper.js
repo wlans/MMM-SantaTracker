@@ -94,30 +94,7 @@ module.exports = NodeHelper.create({
      * Binary search to find Santa's current location efficiently
      */
     findCurrentLocation: function (currentTime) {
-        if (this.arrivalSet.length === 0) return null;
-
-        let left = 0;
-        let right = this.arrivalSet.length - 1;
-        let result = 0;
-
-        this.debugLog("Binary search starting: currentTime=" + new Date(currentTime).toISOString());
-
-        while (left <= right) {
-            let mid = Math.floor((left + right) / 2);
-            this.debugLog("  Checking mid=" + mid + " (left=" + left + ", right=" + right + ")");
-
-            if (this.arrivalSet[mid] <= currentTime) {
-                result = this.arrivalSet[mid];
-                this.debugLog("    Found valid location at index " + mid);
-                left = mid + 1;
-            } else {
-                this.debugLog("    Time too late, searching earlier");
-                right = mid - 1;
-            }
-        }
-
-        this.debugLog("Binary search complete: found timestamp=" + result);
-        return result;
+        return utils.findCurrentLocation(this.arrivalSet, currentTime);
     },
 
     /**
