@@ -33,5 +33,6 @@ All configuration parameters are optional.
 | mapMode | "dark" | The map tile style. Accepted parameters are "dark", "light", "satellite"|
 | lineColor | "#a1100" | Color of the line that follows Santa |
 | lineWidth | 3 | Width of the line that follows Santa |
-| overTime | null | Overrides the module scheduling. You can test the tracker by specifying a valid date & time string on Christmas Eve here. Dates are in format `YYYY-MM-DDTHH:mm:ss.sssZ` with some wiggle room. |
+| overTime | null | **Testing Mode**: Overrides the current time to simulate Santa's journey on Christmas Eve. When set to a date/time string (format: `YYYY-MM-DDTHH:mm:ss.sssZ`), the module will start tracking from that point and automatically advance time by 1 minute with each update interval. This allows you to test the tracker any time of year by setting a Christmas Eve date/time (e.g., `"2025-12-24T18:00:00.000Z"`). The tracker will progress through Santa's route as if time is passing. Leave as `null` for normal real-time operation on Christmas Eve. |
+| debug | false | Enable debug logging. Set to `true` to see detailed console logs about Santa's location updates, map building, and data processing. Useful for troubleshooting. |
 
